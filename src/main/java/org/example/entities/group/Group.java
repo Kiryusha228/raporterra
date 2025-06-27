@@ -2,10 +2,13 @@ package org.example.entities.group;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.entities.collection.CollectionAccess;
 import org.example.entities.user.User;
+import org.example.entities.usergroup.UserGroup;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "groups")
