@@ -1,3 +1,5 @@
+volumes:
+  database:
 services:
   database:
     image: 'postgres:latest'
@@ -11,4 +13,4 @@ services:
       - 'POSTGRES_PASSWORD=${DB_PASSWORD}'
       - 'POSTGRES_DB=${DB_NAME}'
     volumes:
-      - todo:/var/lib/postgresql/data
+      - database:/var/lib/postgresql/data
