@@ -9,6 +9,7 @@ import org.example.entities.user.User;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "reports")
@@ -18,9 +19,9 @@ import java.util.Set;
 @Builder
 public class Report {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "report_id")
-    private Long id;
+    private UUID id;
 
     @Column(nullable = false, length = 255)
     private String name;

@@ -2,6 +2,8 @@ package org.example.entities.report;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "report_parameters")
@@ -16,7 +18,7 @@ public class ReportParameter {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "report_id", nullable = false)
+    @JoinColumn(name = "report_id", nullable = false, columnDefinition = "UUID")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Report report;

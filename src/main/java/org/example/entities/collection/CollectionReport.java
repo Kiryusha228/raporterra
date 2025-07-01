@@ -23,7 +23,7 @@ public class CollectionReport {
 
     @ManyToOne
     @MapsId("reportId")
-    @JoinColumn(name = "report_id")
+    @JoinColumn(name = "report_id", columnDefinition = "uuid")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Report report;

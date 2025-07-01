@@ -8,10 +8,15 @@ import org.example.entities.dbconnection.DatabaseConnection;
 import org.example.entities.group.Group;
 import org.example.entities.report.Report;
 import org.example.entities.usergroup.UserGroup;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 
 @Builder
 @Entity
@@ -19,23 +24,27 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, length = 50)
     private String username;
 
+    @Column(nullable = false, unique = true, length = 50)
+    private String firstName;
+
+    @Column(nullable = false, length = 50)
+    private String lastName;
+
     @Column(name = "password_hash", nullable = false, length = 255)
-    private String passwordHash;
+    private String password;
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
-
-    @Column(name = "full_name", nullable = false, length = 100)
-    private String fullName;
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
@@ -86,4 +95,9 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<UserGroup> userGroups = new HashSet<>();
+
+    @Override
+    public java.util.Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
 }
