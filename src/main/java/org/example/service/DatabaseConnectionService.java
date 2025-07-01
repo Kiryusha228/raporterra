@@ -1,9 +1,9 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.CreateDatabaseConnectionDto;
-import org.example.dto.DatabaseConnectionDto;
-import org.example.entities.dbconnection.DatabaseConnection;
+import org.example.model.dto.CreateDatabaseConnectionDto;
+import org.example.model.dto.DatabaseConnectionDto;
+import org.example.model.entity.dbconnection.DatabaseConnection;
 import org.example.mapper.DatabaseConnectionMapper;
 import org.example.repository.DatabaseConnectionRepository;
 import org.example.repository.UserRepository;

@@ -1,11 +1,12 @@
 package org.example.mapper;
 
-import org.example.dto.CreateDatabaseConnectionDto;
-import org.example.dto.DatabaseConnectionDto;
-import org.example.entities.dbconnection.DatabaseConnection;
-import org.example.entities.user.User;
+import org.example.model.dto.CreateDatabaseConnectionDto;
+import org.example.model.dto.DatabaseConnectionDto;
+import org.example.model.entity.dbconnection.DatabaseConnection;
+import org.example.model.entity.user.User;
 
 import java.util.HashSet;
+import java.util.UUID;
 
 public class DatabaseConnectionMapper {
     public static DatabaseConnection toDatabaseConnectionEntity(CreateDatabaseConnectionDto createDatabaseConnectionDto, User user){
@@ -21,7 +22,7 @@ public class DatabaseConnectionMapper {
     }
 
     public static DatabaseConnectionDto toDatabaseConnectionDto(DatabaseConnection databaseConnection) {
-        var reports = new HashSet<Long>();
+        var reports = new HashSet<UUID>();
         for (var report : databaseConnection.getReports()) {
             reports.add(report.getId());
         }

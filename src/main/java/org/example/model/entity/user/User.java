@@ -1,13 +1,13 @@
-package org.example.entities.user;
+package org.example.model.entity.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.entities.collection.Collection;
-import org.example.entities.collection.CollectionAccess;
-import org.example.entities.dbconnection.DatabaseConnection;
-import org.example.entities.group.Group;
-import org.example.entities.report.Report;
-import org.example.entities.usergroup.UserGroup;
+import org.example.model.entity.collection.Collection;
+import org.example.model.entity.collection.CollectionAccess;
+import org.example.model.entity.dbconnection.DatabaseConnection;
+import org.example.model.entity.group.Group;
+import org.example.model.entity.report.Report;
+import org.example.model.entity.usergroup.UserGroup;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

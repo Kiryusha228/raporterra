@@ -1,14 +1,14 @@
-package org.example.controllers;
+package org.example.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.LoginRequest;
-import org.example.dto.RegisterRequest;
-import org.example.entities.user.User;
-import org.example.repositories.UserRepository;
-import org.example.services.UserService;
+import org.example.model.dto.LoginRequest;
+import org.example.model.dto.RegisterRequest;
+import org.example.model.entity.user.User;
+import org.example.repository.UserRepository;
+import org.example.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

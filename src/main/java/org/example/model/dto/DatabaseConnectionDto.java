@@ -1,13 +1,11 @@
-package org.example.dto;
+package org.example.model.dto;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.example.entities.report.Report;
-import org.example.entities.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -37,5 +35,5 @@ public class DatabaseConnectionDto {
     private boolean isActive = true;
 
     @Builder.Default
-    private Set<Long> reports = new HashSet<>();
+    private Set<UUID> reports = new HashSet<>();
 }

@@ -1,9 +1,9 @@
-package org.example.entities.dbconnection;
+package org.example.model.entity.dbconnection;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.entities.report.Report;
-import org.example.entities.user.User;
+import org.example.model.entity.report.Report;
+import org.example.model.entity.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

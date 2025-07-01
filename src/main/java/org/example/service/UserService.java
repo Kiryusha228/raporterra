@@ -1,10 +1,10 @@
-package org.example.services;
+package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.RegisterRequest;
-import org.example.entities.user.Role;
-import org.example.entities.user.User;
-import org.example.repositories.UserRepository;
+import org.example.model.dto.RegisterRequest;
+import org.example.model.entity.user.Role;
+import org.example.model.entity.user.User;
+import org.example.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

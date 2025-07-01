@@ -1,6 +1,6 @@
 package org.example.repository;
 
-import org.example.entities.dbconnection.DatabaseConnection;
+import org.example.model.entity.dbconnection.DatabaseConnection;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

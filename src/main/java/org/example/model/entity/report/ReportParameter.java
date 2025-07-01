@@ -1,9 +1,7 @@
-package org.example.entities.report;
+package org.example.model.entity.report;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "report_parameters")

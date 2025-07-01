@@ -1,8 +1,8 @@
-package org.example.entities.collection;
+package org.example.model.entity.collection;
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.entities.group.Group;
-import org.example.entities.user.User;
+import org.example.model.entity.group.Group;
+import org.example.model.entity.user.User;
 
 import java.time.LocalDateTime;
 

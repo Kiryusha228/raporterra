@@ -1,4 +1,4 @@
-package org.example.entities.usergroup;
+package org.example.model.entity.usergroup;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

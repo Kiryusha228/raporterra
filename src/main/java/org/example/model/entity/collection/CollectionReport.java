@@ -1,8 +1,8 @@
-package org.example.entities.collection;
+package org.example.model.entity.collection;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.entities.report.Report;
+import org.example.model.entity.report.Report;
 
 @Entity
 @Table(name = "collection_reports")

@@ -1,28 +1,26 @@
-package org.example.entities.group;
+package org.example.model.entity.collection;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.entities.collection.CollectionAccess;
-import org.example.entities.user.User;
-import org.example.entities.usergroup.UserGroup;
+import org.example.model.entity.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "groups")
+@Table(name = "collections")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Group {
+public class Collection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "group_id")
+    @Column(name = "collection_id")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 255)
     private String name;
 
     @Column
@@ -38,12 +36,12 @@ public class Group {
     @EqualsAndHashCode.Exclude
     private User createdBy;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "collection")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<UserGroup> userGroups = new HashSet<>();
+    private Set<CollectionReport> collectionReports = new HashSet<>();
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "collection")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<CollectionAccess> collectionAccesses = new HashSet<>();

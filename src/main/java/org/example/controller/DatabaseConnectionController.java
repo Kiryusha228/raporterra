@@ -1,8 +1,8 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.CreateDatabaseConnectionDto;
-import org.example.dto.DatabaseConnectionDto;
+import org.example.model.dto.CreateDatabaseConnectionDto;
+import org.example.model.dto.DatabaseConnectionDto;
 import org.example.service.DatabaseConnectionService;
 import org.springframework.web.bind.annotation.*;
 

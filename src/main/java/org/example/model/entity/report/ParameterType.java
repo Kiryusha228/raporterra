@@ -1,4 +1,4 @@
-package org.example.entities.report;
+package org.example.model.entity.report;
 
 public enum ParameterType {
     DATE, NUMBER, STRING, BOOLEAN
