@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.model.dto.CreateDatabaseConnectionDto;
 import org.example.model.dto.DatabaseConnectionDto;
 import org.example.service.DatabaseConnectionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/connections")
 public class DatabaseConnectionController {
-
+    private static final Logger log = LoggerFactory.getLogger(DatabaseConnectionController.class);
     private final DatabaseConnectionService databaseConnectionService;
 
     @PostMapping()
@@ -22,6 +25,13 @@ public class DatabaseConnectionController {
 
     @GetMapping()
     public List<DatabaseConnectionDto> getAllDatabaseConnections() {
+        MDC.put("userId", "user-123");
+        MDC.put("requestId", "1");
+
+        log.info("This will be sent to Graylog");
+        log.error("Error example", new RuntimeException("Test error"));
+
+        MDC.clear();
         return databaseConnectionService.getAllDatabaseConnections();
     }
 

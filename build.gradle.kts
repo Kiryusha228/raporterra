@@ -31,6 +31,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     //swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    //logs
+    implementation("org.springframework.boot:spring-boot-starter-logging") // Logback по умолчанию
+    implementation("de.appelgriepsch.logback:logback-gelf-appender:1.5")
+// Зависимость для Logstash Logback Encoder (при версиях 7, 8 и выше настройки в logback-spring.xml будут другие!
+    implementation("net.logstash.logback:logstash-logback-encoder:6.6")
 }
 
 tasks.test {

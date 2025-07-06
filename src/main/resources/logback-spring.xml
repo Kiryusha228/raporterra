@@ -1,0 +1,25 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <appender name="gelf" class="de.appelgriepsch.logback.GelfAppender">
+        <server>127.0.0.1</server>
+        <port>12201</port>
+        <protocol>UDP</protocol>
+        <includeSource>true</includeSource>
+        <includeMDC>true</includeMDC>
+        <queueSize>512</queueSize>
+        <connectTimeout>1000</connectTimeout>
+        <reconnectDelay>500</reconnectDelay>
+        <additionalFields>method=${springAppName}</additionalFields>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %X{mdcData} - %msg%n</pattern>
+            <additionalField>app=cdp</additionalField>
+        </layout>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="gelf" />
+    </root>
+</configuration>
