@@ -62,11 +62,13 @@ public class Report {
     private boolean isPublic = false;
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<ReportParameter> parameters = new HashSet<>();
 
     @OneToMany(mappedBy = "report")
+    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<CollectionReport> collectionReports = new HashSet<>();
