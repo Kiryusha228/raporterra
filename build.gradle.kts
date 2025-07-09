@@ -31,6 +31,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     //swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    // MapStruct
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 }
 
 tasks.test {
