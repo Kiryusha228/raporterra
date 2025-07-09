@@ -1,10 +1,8 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.model.dto.report.AvailableReportsDto;
-import org.example.model.dto.report.CreateReportDto;
-import org.example.model.dto.report.ReportMetadataDto;
-import org.example.model.dto.report.UpdateReportDto;
+import org.example.model.dto.report.*;
+import org.example.service.ReportQueueService;
 import org.example.service.ReportService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +15,7 @@ import java.util.UUID;
 @RequestMapping("/api/reports")
 public class ReportController {
     private final ReportService reportService;
+    private final ReportQueueService reportQueueService;
 
     @PostMapping()
     public UUID createReport(@RequestBody CreateReportDto createReportDto, Long userId) {
@@ -44,8 +43,13 @@ public class ReportController {
     }
 
     @PostMapping("/{reportId}/execute")
-    public List<Map<String, Object>> executeReport(@PathVariable UUID reportId) {
-        return reportService.executeReport(reportId);
+    public ReportQueueResultDto executeReport(@PathVariable UUID reportId) {
+        return reportService.setToQueue(reportId);
+    }
+
+    @PostMapping("/{taskId}/get")
+    public List<Map<String, Object>> executeReport(@PathVariable Long taskId) {
+        return reportService.getResult(taskId);
     }
 
 }

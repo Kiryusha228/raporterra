@@ -1,11 +1,8 @@
 package org.example.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.exception.DatabaseConnectionNotFoundException;
 import org.example.exception.UnsupportedDatabaseException;
 import org.example.model.entity.dbconnection.DatabaseConnection;
-import org.example.repository.DatabaseConnectionRepository;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;

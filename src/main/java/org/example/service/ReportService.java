@@ -1,16 +1,14 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.component.ResultStorage;
 import org.example.config.JdbcConfig;
 import org.example.exception.DatabaseConnectionNotFoundException;
 import org.example.exception.InvalidReportQueryException;
 import org.example.exception.ReportNotFoundException;
 import org.example.exception.UserNotFoundException;
 import org.example.mapper.ReportMapper;
-import org.example.model.dto.report.AvailableReportsDto;
-import org.example.model.dto.report.CreateReportDto;
-import org.example.model.dto.report.ReportMetadataDto;
-import org.example.model.dto.report.UpdateReportDto;
+import org.example.model.dto.report.*;
 import org.example.model.entity.report.Report;
 import org.example.repository.DatabaseConnectionRepository;
 import org.example.repository.ReportRepository;
@@ -30,9 +28,13 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ReportMapper reportMapper;
 
+    private final ReportQueueService reportQueueService;
+
     private final JdbcConfig jdbcConfig;
 
-    public UUID createReport(CreateReportDto createReportDto, Long userId){
+    private final ResultStorage resultStorage;
+
+    public UUID createReport(CreateReportDto createReportDto, Long userId) {
         var connection = databaseConnectionRepository
                 .findById(createReportDto.getConnection()).orElseThrow(
                         () -> new DatabaseConnectionNotFoundException("Соединения с таким id не найдено!")
@@ -93,7 +95,7 @@ public class ReportService {
         reportRepository.deleteById(reportId);
     }
 
-    public List<Map<String, Object>> executeReport(UUID reportId) { //todo разобраться с очередью
+    public List<Map<String, Object>> executeReport(UUID reportId) {
         var report = reportRepository.findById(reportId).orElseThrow(
                 () -> new ReportNotFoundException("Отчет с данным UUID не найден!")
         );
@@ -113,5 +115,19 @@ public class ReportService {
                 && !normalized.contains(";")
                 && !normalized.contains("EXEC")
                 && !normalized.contains("CALL");
+    }
+
+    public ReportQueueResultDto setToQueue(UUID reportId) {
+        var report = reportRepository.findById(reportId).orElseThrow(
+                () -> new ReportNotFoundException("Отчет с данным UUID не найден!")
+        );
+
+        return reportQueueService.enqueue(report);
+    }
+
+    public List<Map<String, Object>> getResult(Long taskId) {
+        var result = resultStorage.getResult(taskId);
+        resultStorage.remove(taskId);
+        return result;  //todo придумать что делать если еще не выполнено
     }
 }
