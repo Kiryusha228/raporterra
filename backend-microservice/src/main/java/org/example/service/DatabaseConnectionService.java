@@ -6,7 +6,7 @@ import org.example.model.dto.CreateDatabaseConnectionDto;
 import org.example.model.dto.DatabaseConnectionDto;
 import org.example.mapper.DatabaseConnectionMapper;
 import org.example.repository.DatabaseConnectionRepository;
-import org.example.repository.UserRepository;
+import org.example.repository.UserInfoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DatabaseConnectionService {
-    private final UserRepository userRepository;
+    private final UserInfoRepository userRepository;
     private final DatabaseConnectionRepository databaseConnectionRepository;
     private final JdbcConfig jdbcConfig;
     private final DatabaseConnectionMapper databaseConnectionMapper;

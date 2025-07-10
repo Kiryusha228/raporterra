@@ -2,7 +2,7 @@ package org.example.model.entity.collection;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.model.entity.user.User;
+import org.example.model.entity.user.UserInfo;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -34,7 +34,7 @@ public class Collection {
     @JoinColumn(name = "created_by", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User createdBy;
+    private UserInfo createdBy;
 
     @OneToMany(mappedBy = "collection")
     @ToString.Exclude

@@ -3,7 +3,7 @@ package org.example.model.entity.usergroup;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.model.entity.group.Group;
-import org.example.model.entity.user.User;
+import org.example.model.entity.user.UserInfo;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +30,7 @@ public class UserGroup {
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User user;
+    private UserInfo user;
 
     @Column(name = "joined_at", nullable = false)
     @Builder.Default
@@ -40,6 +40,6 @@ public class UserGroup {
     @JoinColumn(name = "added_by", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User addedBy;
+    private UserInfo addedBy;
 }
 

@@ -12,7 +12,7 @@ import org.example.model.dto.report.*;
 import org.example.model.entity.report.Report;
 import org.example.repository.DatabaseConnectionRepository;
 import org.example.repository.ReportRepository;
-import org.example.repository.UserRepository;
+import org.example.repository.UserInfoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReportService {
     private final DatabaseConnectionRepository databaseConnectionRepository;
-    private final UserRepository userRepository;
+    private final UserInfoRepository userRepository;
     private final ReportRepository reportRepository;
     private final ReportMapper reportMapper;
 

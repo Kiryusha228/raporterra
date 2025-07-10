@@ -27,12 +27,6 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 50)
     private String username;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String firstName;
-
-    @Column(nullable = false, length = 50)
-    private String lastName;
-
     @Column(name = "password_hash", nullable = false, length = 255)
     private String password;
 
@@ -42,17 +36,6 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @Column(name = "created_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
-
-    @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private boolean isActive = true;
 
     @Override
     public java.util.Collection<? extends GrantedAuthority> getAuthorities() {

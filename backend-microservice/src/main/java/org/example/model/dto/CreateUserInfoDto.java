@@ -3,10 +3,8 @@ package org.example.model.dto;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
-    private String username;
+public class CreateUserInfoDto {
+    private Long id;
     private String firstName;
     private String lastName;
-    private String password;
-    private String email;
 }

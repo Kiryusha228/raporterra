@@ -3,7 +3,7 @@ package org.example.mapper;
 import org.example.model.dto.CreateDatabaseConnectionDto;
 import org.example.model.dto.DatabaseConnectionDto;
 import org.example.model.entity.dbconnection.DatabaseConnection;
-import org.example.model.entity.user.User;
+import org.example.model.entity.user.UserInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING) //todo переделать
 public class DatabaseConnectionMapper {
-    public DatabaseConnection toDatabaseConnectionEntity(CreateDatabaseConnectionDto createDatabaseConnectionDto, User user){
+    public DatabaseConnection toDatabaseConnectionEntity(CreateDatabaseConnectionDto createDatabaseConnectionDto, UserInfo user){
          return DatabaseConnection.builder()
                 .name(createDatabaseConnectionDto.getName())
                 .dbType(createDatabaseConnectionDto.getDbType())

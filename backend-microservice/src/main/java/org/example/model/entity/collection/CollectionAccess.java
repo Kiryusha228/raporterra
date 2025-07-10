@@ -2,7 +2,7 @@ package org.example.model.entity.collection;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.model.entity.group.Group;
-import org.example.model.entity.user.User;
+import org.example.model.entity.user.UserInfo;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +28,7 @@ public class CollectionAccess {
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User user;
+    private UserInfo user;
 
     @ManyToOne
     @JoinColumn(name = "group_id")
@@ -47,7 +47,7 @@ public class CollectionAccess {
     @JoinColumn(name = "granted_by", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User grantedBy;
+    private UserInfo grantedBy;
 
     @PrePersist
     @PreUpdate

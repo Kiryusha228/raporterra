@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.model.entity.collection.CollectionReport;
 import org.example.model.entity.dbconnection.DatabaseConnection;
-import org.example.model.entity.user.User;
+import org.example.model.entity.user.UserInfo;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -46,7 +46,7 @@ public class Report {
     @JoinColumn(name = "created_by", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User createdBy;
+    private UserInfo createdBy;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
@@ -55,7 +55,7 @@ public class Report {
     @JoinColumn(name = "updated_by")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User updatedBy;
+    private UserInfo updatedBy;
 
     @Column(name = "is_public", nullable = false)
     @Builder.Default

@@ -3,7 +3,7 @@ package org.example.model.entity.dbconnection;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.model.entity.report.Report;
-import org.example.model.entity.user.User;
+import org.example.model.entity.user.UserInfo;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public class DatabaseConnection {
     @JoinColumn(name = "created_by", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private User createdBy;
+    private UserInfo createdBy;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
