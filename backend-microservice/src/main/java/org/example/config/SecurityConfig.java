@@ -29,12 +29,16 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**", //пока не работает авторизация
-                                "/auth/**",
+                        .requestMatchers("/api/user/register",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**").permitAll()
+                        .requestMatchers("/api/connections/all"
+                        ).hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/connections",
+                                "/api/connections/**"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

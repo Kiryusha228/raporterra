@@ -1,4 +1,4 @@
-package org.example.model.dto;
+package org.example.model.dto.connection;
 
 import lombok.*;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DatabaseConnectionDto {
+public class FullDatabaseConnectionDto {
     private String name;
 
     private String dbType;

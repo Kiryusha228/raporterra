@@ -1,9 +1,12 @@
 package org.example.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.config.JdbcConfig;
-import org.example.model.dto.CreateDatabaseConnectionDto;
-import org.example.model.dto.DatabaseConnectionDto;
+import org.example.exception.DatabaseConnectionNotFoundException;
+import org.example.model.dto.connection.CreateDatabaseConnectionDto;
+import org.example.model.dto.connection.DatabaseConnectionDto;
+import org.example.model.dto.connection.FullDatabaseConnectionDto;
 import org.example.mapper.DatabaseConnectionMapper;
 import org.example.repository.DatabaseConnectionRepository;
 import org.example.repository.UserInfoRepository;
@@ -20,24 +23,21 @@ public class DatabaseConnectionService {
     private final JdbcConfig jdbcConfig;
     private final DatabaseConnectionMapper databaseConnectionMapper;
 
-    public void createDatabaseConnection(CreateDatabaseConnectionDto createDatabaseConnectionDto, Long userid){
-        var userOptional = userRepository.findById(userid);
-        if (userOptional.isEmpty()) {
-            throw new NullPointerException("Пользователя с указанным id не существует");
-        }
-        var user = userOptional.get();
+    public void createDatabaseConnection(CreateDatabaseConnectionDto createDatabaseConnectionDto, String userMail){
+        var user = userRepository.findByEmail(userMail).orElseThrow(
+                () -> new NullPointerException("Пользователя не существует")
+        );
         databaseConnectionRepository.save(
-                databaseConnectionMapper.toDatabaseConnectionEntity(createDatabaseConnectionDto, user)
+                databaseConnectionMapper.toEntity(createDatabaseConnectionDto, user)
         );
     }
 
-    public DatabaseConnectionDto getDatabaseConnection(Long databaseConnectionId) {
-        var databaseConnectionOptional = databaseConnectionRepository.findById(databaseConnectionId);
-        if (databaseConnectionOptional.isEmpty()) {
-            throw new NullPointerException("Подключения с данным id не существует");
-        }
+    public FullDatabaseConnectionDto getDatabaseConnection(Long databaseConnectionId) {
+        var databaseConnection = databaseConnectionRepository.findById(databaseConnectionId).orElseThrow(
+                () -> new DatabaseConnectionNotFoundException("Подключения с данным id не существует")
+        );
 
-        return databaseConnectionMapper.toDatabaseConnectionDto(databaseConnectionOptional.get());
+        return databaseConnectionMapper.toFullDatabaseConnectionDto(databaseConnection);
     }
 
     public List<DatabaseConnectionDto> getAllDatabaseConnections() {
@@ -50,13 +50,12 @@ public class DatabaseConnectionService {
         return databaseConnectionsDto;
     }
 
+    @Transactional
     public void updateDatabaseConnection(Long databaseConnectionId, CreateDatabaseConnectionDto createDatabaseConnectionDto) {
-        var databaseConnectionOptional = databaseConnectionRepository.findById(databaseConnectionId);
-        if (databaseConnectionOptional.isEmpty()) {
-            throw new NullPointerException("Подключения с данным id не существует");
-        }
+        var databaseConnection = databaseConnectionRepository.findById(databaseConnectionId).orElseThrow(
+                () -> new DatabaseConnectionNotFoundException("Подключения с данным id не существует")
+        );
 
-        var databaseConnection = databaseConnectionOptional.get();
         databaseConnection.setName(createDatabaseConnectionDto.getName());
         databaseConnection.setDbType(createDatabaseConnectionDto.getDbType());
         databaseConnection.setHost(createDatabaseConnectionDto.getHost());
@@ -64,8 +63,6 @@ public class DatabaseConnectionService {
         databaseConnection.setDatabaseName(createDatabaseConnectionDto.getDatabaseName());
         databaseConnection.setUsername(createDatabaseConnectionDto.getUsername());
         databaseConnection.setEncryptedPassword(createDatabaseConnectionDto.getEncryptedPassword());
-
-        databaseConnectionRepository.save(databaseConnection);
     }
 
     public boolean testConnection(Long connectionId){
