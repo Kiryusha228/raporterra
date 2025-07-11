@@ -48,24 +48,9 @@ public class Report {
     @EqualsAndHashCode.Exclude
     private UserInfo createdBy;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "updated_by")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private UserInfo updatedBy;
-
     @Column(name = "is_public", nullable = false)
     @Builder.Default
     private boolean isPublic = false;
-
-    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<ReportParameter> parameters = new HashSet<>();
 
     @OneToMany(mappedBy = "report")
     @Builder.Default

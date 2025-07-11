@@ -34,10 +34,14 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**").permitAll()
-                        .requestMatchers("/api/connections/all"
+                        .requestMatchers("/api/connections/all",
+                                "/api/reports/get",
+                                "/api/reports/execute"
                         ).hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/connections",
-                                "/api/connections/**"
+                                "/api/connections/**",
+                                "/api/reports",
+                                "/api/reports/**"
                         ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

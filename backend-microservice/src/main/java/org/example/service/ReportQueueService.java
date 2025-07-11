@@ -30,6 +30,10 @@ public class ReportQueueService {
         return result;
     }
 
+    public Long getQueueSize() {
+        return reportQueueRepository.countByStatus(TaskStatus.PENDING);
+    }
+
     @Transactional
     public Optional<ReportQueue> getNextPending() {
         return reportQueueRepository.findNextPending();

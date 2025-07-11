@@ -49,11 +49,6 @@ public class UserInfo {
     @EqualsAndHashCode.Exclude
     private Set<Report> createdReports = new HashSet<>();
 
-    @OneToMany(mappedBy = "updatedBy")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<Report> updatedReports = new HashSet<>();
-
     @OneToMany(mappedBy = "createdBy")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
