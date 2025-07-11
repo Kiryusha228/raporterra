@@ -1,5 +1,6 @@
 package org.example.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.component.ResultStorage;
 import org.example.config.JdbcConfig;
@@ -10,15 +11,14 @@ import org.example.exception.UserNotFoundException;
 import org.example.mapper.ReportMapper;
 import org.example.model.dto.report.*;
 import org.example.model.entity.report.Report;
+import org.example.model.entity.user.Role;
 import org.example.repository.DatabaseConnectionRepository;
 import org.example.repository.ReportRepository;
 import org.example.repository.UserInfoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +34,14 @@ public class ReportService {
 
     private final ResultStorage resultStorage;
 
-    public UUID createReport(CreateReportDto createReportDto, Long userId) {
+    public UUID createReport(CreateReportDto createReportDto, String userMail) {
         var connection = databaseConnectionRepository
                 .findById(createReportDto.getConnection()).orElseThrow(
                         () -> new DatabaseConnectionNotFoundException("Соединения с таким id не найдено!")
                 );
 
         var user = userRepository
-                .findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден!"));
+                .findByEmail(userMail).orElseThrow(() -> new UserNotFoundException("Пользователь не найден!"));
 
         var report = Report.builder()
                 .name(createReportDto.getName())
@@ -55,17 +55,22 @@ public class ReportService {
         return report.getId();
     }
 
-    public List<AvailableReportsDto> getAvailableReports() {
-        return reportMapper.toAvailableReportsDtoList(reportRepository.findByIsPublicTrue());
+    public List<AvailableReportsDto> getAvailableReports(String role) {
+        List<Report> reports;
+        if (role.equals("ROLE_ADMIN")) {
+            reports = reportRepository.findAll();
+        }
+        else {
+            reports = reportRepository.findByIsPublicTrue();
+        }
+        return reportMapper.toAvailableReportsDtoList(reports);
     }
 
-    public void updateReport(UpdateReportDto updateReportDto, Long userId, UUID reportId) {
+    @Transactional
+    public void updateReport(UpdateReportDto updateReportDto, UUID reportId) {
         var report = reportRepository.findById(reportId).orElseThrow(
                 () -> new ReportNotFoundException("Отчет с данным UUID не найден!")
         );
-
-        var user = userRepository
-                .findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден!"));
 
         var connection = databaseConnectionRepository
                 .findById(updateReportDto.getConnection()).orElseThrow(
@@ -76,11 +81,7 @@ public class ReportService {
         report.setDescription(updateReportDto.getDescription());
         report.setSqlQuery(updateReportDto.getSqlQuery());
         report.setConnection(connection);
-        report.setUpdatedAt(LocalDateTime.now());
-        report.setUpdatedBy(user);
         report.setPublic(updateReportDto.isPublic());
-
-        reportRepository.save(report);
     }
 
     public ReportMetadataDto getReport(UUID reportId) { // todo добавить функционал админ/юзер
@@ -125,9 +126,9 @@ public class ReportService {
         return reportQueueService.enqueue(report);
     }
 
-    public List<Map<String, Object>> getResult(Long taskId) {
-        var result = resultStorage.getResult(taskId);
+    public Optional<List<Map<String, Object>>> getResult(Long taskId) {
+        var result = Optional.ofNullable(resultStorage.getResult(taskId));
         resultStorage.remove(taskId);
-        return result;  //todo придумать что делать если еще не выполнено
+        return result;
     }
 }

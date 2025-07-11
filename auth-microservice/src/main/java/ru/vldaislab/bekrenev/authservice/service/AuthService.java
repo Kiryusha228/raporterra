@@ -38,6 +38,7 @@ public class AuthService {
 
         userInfoClient.addUserInfo(new CreateUserInfoDto(
                 user.getId(),
+                request.getEmail(),
                 request.getFirstName(),
                 request.getLastName()
                 )
