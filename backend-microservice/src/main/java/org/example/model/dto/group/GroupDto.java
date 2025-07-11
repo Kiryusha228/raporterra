@@ -14,6 +14,5 @@ public class GroupDto {
     private String name;
     private String description;
     private LocalDateTime createdAt = LocalDateTime.now();
-    private UserInfo createdBy;
-
+    private Long createdBy;
 }

@@ -9,6 +9,7 @@ import org.example.model.dto.group.CreateGroupDto;
 import org.example.model.dto.group.GroupDto;
 import org.example.model.dto.group.UpdateGroupDto;
 import org.example.model.entity.user.UserInfo;
+import org.example.model.entity.usergroup.UserGroup;
 import org.example.model.entity.usergroup.UserGroupId;
 import org.example.repository.GroupRepository;
 import org.example.repository.UserGroupRepository;
@@ -16,6 +17,7 @@ import org.example.repository.UserInfoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -41,11 +43,11 @@ public class GroupService {
 
     @Transactional
     public void createGroup(CreateGroupDto createGroupDto, String userMail) {
-        var user = userRepository.findByEmail(userMail).orElseThrow(
+        var admin = userRepository.findByEmail(userMail).orElseThrow(
                 () -> new NullPointerException("Пользователя не существует")
         );
 
-        var group = groupMapper.toEntity(createGroupDto, user);
+        var group = groupMapper.toEntity(createGroupDto, admin);
 
         var users = new ArrayList<UserInfo>();
         for (Long id : createGroupDto.getUsers()) {
@@ -53,10 +55,14 @@ public class GroupService {
                     () -> new UserNotFoundException("Пользователь не найден"))
             );
         }
+        group = groupRepository.save(group);
 
-        var userGroups = groupMapper.toUserGroups(users, group, user);
-
+        var userGroups = new HashSet<UserGroup>();
+        for (var user : users) {
+            userGroups.add(groupMapper.toUserGroup(user, group, admin));
+        }
         group.setUserGroups(userGroups);
+        userGroupRepository.saveAll(userGroups);
         groupRepository.save(group);
     }
 
@@ -71,37 +77,44 @@ public class GroupService {
     }
 
     @Transactional
-    public void addUserToGroup(Long groupId, Long userId, String adminMail) {
-        var group = groupRepository.findById(groupId).orElseThrow(
+    public void addUserToGroup(UserGroupId userGroupId, String adminMail) {
+        var group = groupRepository.findById(userGroupId.getGroupId()).orElseThrow(
                 ()-> new GroupNotFoundException("Группа с данным id не найдена!")
         );
 
-        var user = userRepository.findById(userId).orElseThrow(
+        var user = userRepository.findById(userGroupId.getUserId()).orElseThrow(
                 () -> new NullPointerException("Пользователя не существует")
         );
 
         var admin = userRepository.findByEmail(adminMail).orElseThrow(
                 () -> new NullPointerException("Пользователя не существует")
         );
+        var userGroup = groupMapper.toUserGroup(user, group, admin);
 
-        group.getUserGroups().add(groupMapper.toUserGroup(user, group, admin));
-    }
+        userGroupRepository.save(userGroup);
 
-    public void deleteGroup(Long groupId){
-        groupRepository.deleteById(groupId);
+        group.getUserGroups().add(userGroup);
     }
 
     @Transactional
-    public void deleteUserFromGroup(Long groupId, Long userId) {
+    public void deleteGroup(Long groupId){
         var group = groupRepository.findById(groupId).orElseThrow(
                 ()-> new GroupNotFoundException("Группа с данным id не найдена!")
         );
+        userGroupRepository.deleteAll(group.getUserGroups());
+        groupRepository.delete(group);
+    }
 
-        var user = userRepository.findById(userId).orElseThrow(
+    @Transactional
+    public void deleteUserFromGroup(UserGroupId userGroupId) {
+        var group = groupRepository.findById(userGroupId.getGroupId()).orElseThrow(
+                ()-> new GroupNotFoundException("Группа с данным id не найдена!")
+        );
+
+        userRepository.findById(userGroupId.getUserId()).orElseThrow(
                 () -> new NullPointerException("Пользователя не существует")
         );
 
-        var userGroupId = new UserGroupId(groupId,userId);
         var userGroup = userGroupRepository.findById(userGroupId).orElseThrow(
                 () -> new GroupNotFoundException("Такая связь пользователя и группы не найдена!")
         );
