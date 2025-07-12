@@ -11,6 +11,8 @@ import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ReportMapper {
+    AvailableReportsDto toAvailableReportsDto(Report report);
+
     List<AvailableReportsDto> toAvailableReportsDtoList(List<Report> reports);
 
     @Mapping(target = "connectionId", source = "connection.id")
