@@ -54,11 +54,6 @@ public class UserInfo {
     @EqualsAndHashCode.Exclude
     private Set<Collection> createdCollections = new HashSet<>();
 
-    @OneToMany(mappedBy = "grantedBy")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<CollectionAccess> grantedAccesses = new HashSet<>();
-
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

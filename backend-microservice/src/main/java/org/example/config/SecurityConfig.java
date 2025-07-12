@@ -36,12 +36,17 @@ public class SecurityConfig {
                                 "/webjars/**").permitAll()
                         .requestMatchers("/api/connections/all",
                                 "/api/reports/get",
-                                "/api/reports/execute"
+                                "/api/reports/execute",
+                                "/api/collections/get/**"
                         ).hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/connections",
                                 "/api/connections/**",
                                 "/api/reports",
-                                "/api/reports/**"
+                                "/api/reports/**",
+                                "/api/groups",
+                                "/api/groups/**",
+                                "/api/collections",
+                                "/api/collections/**"
                         ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

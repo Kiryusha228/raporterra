@@ -2,6 +2,7 @@ package org.example.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.exception.CollectionAccessDeniedException;
 import org.example.exception.CollectionNotFoundException;
 import org.example.exception.GroupNotFoundException;
 import org.example.exception.ReportNotFoundException;
@@ -18,7 +19,6 @@ import org.example.model.entity.group.Group;
 import org.example.model.entity.usergroup.UserGroup;
 import org.example.repository.*;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 
 @Service
@@ -211,10 +211,24 @@ public class CollectionService {
         collectionRepository.save(collection);
     }
 
-    public List<AvailableReportsDto> getReportsInCollection(Long collectionId) {
+    public List<AvailableReportsDto> getReportsInCollection(Long collectionId, String userMail) {
         var collection = collectionRepository.findById(collectionId).orElseThrow(
                 () -> new CollectionNotFoundException("Соединение не найдено!")
         );
+
+        var user = userInfoRepository.findByEmail(userMail).orElseThrow(
+                () -> new NullPointerException("Пользователя не существует")
+        );
+
+        boolean hasDirectAccess = collectionAccessRepository.existsByCollectionAndUser(collection, user);
+        boolean hasGroupAccess = user.getUserGroups().stream()
+                .map(UserGroup::getGroup)
+                .anyMatch(group -> collectionAccessRepository.existsByCollectionAndGroup(collection, group));
+
+        if (!hasDirectAccess && !hasGroupAccess) {
+            throw new CollectionAccessDeniedException("Пользователь не имеет доступа!");
+        }
+
 
         var reports = new ArrayList<AvailableReportsDto>();
 

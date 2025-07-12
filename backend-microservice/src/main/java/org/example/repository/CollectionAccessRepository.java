@@ -16,6 +16,9 @@ public interface CollectionAccessRepository extends JpaRepository<CollectionAcce
     List<CollectionAccess> findByUser(UserInfo user);
     List<CollectionAccess> findByGroup(Group group);
 
+    boolean existsByCollectionAndUser(Collection collection, UserInfo user);
+    boolean existsByCollectionAndGroup(Collection collection, Group group);
+
     Optional<CollectionAccess> findByUserAndCollection(UserInfo user, Collection collection);
     Optional<CollectionAccess> findByGroupAndCollection(Group group, Collection collection);
 }
