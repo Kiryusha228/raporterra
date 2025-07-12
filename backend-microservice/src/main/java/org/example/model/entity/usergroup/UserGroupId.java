@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UserGroupId implements Serializable {
     @Column(name = "group_id")
     private Long groupId;

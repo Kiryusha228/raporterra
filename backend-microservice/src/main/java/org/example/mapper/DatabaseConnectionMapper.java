@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING) //todo переделать
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DatabaseConnectionMapper {
 
     @Mapping(target = "id", ignore = true)

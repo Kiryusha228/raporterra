@@ -43,7 +43,7 @@ public class Group {
     @EqualsAndHashCode.Exclude
     private Set<UserGroup> userGroups = new HashSet<>();
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<CollectionAccess> collectionAccesses = new HashSet<>();
