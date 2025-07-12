@@ -1,5 +1,6 @@
 package org.example.repository;
 
+import org.example.model.entity.collection.Collection;
 import org.example.model.entity.collection.CollectionAccess;
 import org.example.model.entity.group.Group;
 import org.example.model.entity.user.UserInfo;
@@ -14,4 +15,7 @@ public interface CollectionAccessRepository extends JpaRepository<CollectionAcce
 
     List<CollectionAccess> findByUser(UserInfo user);
     List<CollectionAccess> findByGroup(Group group);
+
+    Optional<CollectionAccess> findByUserAndCollection(UserInfo user, Collection collection);
+    Optional<CollectionAccess> findByGroupAndCollection(Group group, Collection collection);
 }

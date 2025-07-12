@@ -1,16 +1,13 @@
-package org.example.model.dto.report;
+package org.example.model.dto.collection;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AvailableReportsDto {
-    private UUID id;
+public class UpdateCollectionDto {
     private String name;
     private String description;
 }
