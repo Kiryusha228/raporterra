@@ -36,19 +36,6 @@ public class CollectionAccess {
     @EqualsAndHashCode.Exclude
     private Group group;
 
-    @Column(name = "access_level", nullable = false, length = 20)
-    private String accessLevel;
-
-    @Column(name = "granted_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime grantedAt = LocalDateTime.now();
-
-    @ManyToOne
-    @JoinColumn(name = "granted_by", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private UserInfo grantedBy;
-
     @PrePersist
     @PreUpdate
     private void validate() {

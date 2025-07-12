@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Embeddable
 @Data
@@ -19,5 +20,5 @@ public class CollectionReportId implements Serializable {
     private Long collectionId;
 
     @Column(name = "report_id")
-    private Long reportId;
+    private UUID reportId;
 }
