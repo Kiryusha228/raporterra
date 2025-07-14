@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.vldaislab.bekrenev.authservice.model.user.User;
@@ -19,11 +20,9 @@ import java.util.Base64;
 @Service
 public class JwtService {
 
-    private static final long EXPIRATION_TIME_MS = 1000 * 60 * 60 * 24; // 24 часа
-//    знаю что нельзя оставлять такое в коде, но это предварительный варик
+    private static final long EXPIRATION_TIME_MS = 86400000;
 
-    private static final String SECRET_KEY_RAW = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoidGVzdHVzZXIiLCJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzUxOTkwNjMyLCJleHAiOjE3NTIwNzcwMzJ9.WAeeOuKPpQGG8gi1sgAtUKuhNh2cBiGpvqPBRhT4h1I";
-
+    private static String SECRET_KEY_RAW = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoidGVzdHVzZXIiLCJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzUxOTkwNjMyLCJleHAiOjE3NTIwNzcwMzJ9.WAeeOuKPpQGG8gi1sgAtUKuhNh2cBiGpvqPBRhT4h1I";
     private Key secretKey;
 
     @PostConstruct
@@ -34,6 +33,7 @@ public class JwtService {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId());
         claims.put("role", user.getRole().name());
         claims.put("username", user.getUsername());
 
