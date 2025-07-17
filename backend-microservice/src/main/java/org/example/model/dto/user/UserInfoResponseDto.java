@@ -2,6 +2,7 @@ package org.example.model.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.example.model.entity.user.Role;
 
 @Data
 @AllArgsConstructor
@@ -11,6 +12,6 @@ public class UserInfoResponseDto {
     private String email;
     private String firstName;
     private String lastName;
-    private String role;
+    private Role role;
 }
 
