@@ -1,5 +1,6 @@
 package ru.vldaislab.bekrenev.authservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class AuthController {
     private final MailSenderService mailSender;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
             AuthResponse response = authService.register(request);
             mailSender.sendRegistrationEmail(request.getEmail(), request.getFirstName());
@@ -32,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> authenticate(@Valid @RequestBody AuthRequest request) {
         try {
             AuthResponse response = authService.authenticate(request);
             mailSender.sentLoginEmail(request.getEmail());

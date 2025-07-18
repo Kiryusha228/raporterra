@@ -1,5 +1,6 @@
 package org.example.model.dto.user;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
