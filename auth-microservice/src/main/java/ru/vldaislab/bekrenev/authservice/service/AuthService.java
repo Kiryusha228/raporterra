@@ -1,6 +1,7 @@
 package ru.vldaislab.bekrenev.authservice.service;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,7 @@ public class AuthService {
 
     private final UserInfoClient userInfoClient;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         User user = User.builder()
                 .email(request.getEmail())

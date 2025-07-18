@@ -11,6 +11,7 @@ import ru.vldaislab.bekrenev.authservice.model.dto.RegisterRequest;
 import ru.vldaislab.bekrenev.authservice.service.AuthService;
 import ru.vldaislab.bekrenev.authservice.service.MailSenderService;
 
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
