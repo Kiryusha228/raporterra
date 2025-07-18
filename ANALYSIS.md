@@ -1,4 +1,151 @@
-# Анализ функциональных требований к ПО
+# Анализ требований к ПО
+
+## Архитектура ПО
+
+### 1. Общая схема архитектуры
+
+┌───────────────────────┐       ┌───────────────────────┐
+│                       │       │                       │
+│        Сервис         │       │       Основной        │
+│    аутентификации     │───────┤     бизнес-сервис     │
+│                       │ REST  │                       │
+└───────────┬───────────┘       └───────────┬───────────┘
+            │                               │            
+            │                               │            
+┌───────────▼───────────┐       ┌───────────▼───────────┐
+│  PostgreSQL (auth_db) │       │       PostgreSQL      │
+│                       │       │    (raporterra_db)    │
+└───────────────────────┘       └───────────────────────┘
+
+### 2. Сервис аутентификации
+
+#### Компоненты
+1) Пакет controller
+  • AuthController.java - обработка HTTP-запросов:
+    - /api/auth/register (POST) - регистрация
+    - /api/auth/login (POST) - аутентификация
+    - Использует DTO (RegisterRequest, AuthRequest, AuthResponse)
+2) Пакет service
+  • AuthService.java - ядро бизнес-логики аутентификации:
+    - Валидация учетных данных
+    - Работа с пользователями
+  • JwtService.java - генерация/верификация JWT
+  • CustomUserDetailsService.java - интеграция с Spring Security
+3) Пакет repository
+  • UserRepository.java - доступ к данным
+4) Пакет model
+  • Сущности:
+    - User.java - основная модель пользователя
+    - Role.java - enum ролей (ADMIN, ANALYST, USER)
+  • DTO:
+    - AuthRequest.java - запрос на вход
+5) Пакет config
+  • SecurityConfig.java - настройки Spring Security
+  • JwtFilter.java - фильтр для проверки JWT
+  • WebClientConfig.java - настройка HTTP-клиента
+6) Пакет client
+  • UserInfoClient.java - REST-клиент для интеграции с другими сервисами
+
+### 3. Основной бизнес-сервис
+
+#### Компоненты
+1) Пакет controller
+  • ReportController.java - управление отчётами (CRUD + выполнение)
+  • CollectionController.java - работа с коллекциями
+  • DatabaseConnectionController.java - подключения к БД
+  • UserInfoController.java - информация о пользователях
+  • GroupController.java - управление группами пользователей
+2)  Пакет service
+  • CollectionService.java - логика работы с коллекциями
+  • DatabaseConnectionService.java - управление подключениями к БД
+  • GroupService.java - логика управления группами пользователей
+  • ReportQueueService.java - очередь выполнения отчётов
+  • ReportService.java - логика управления отчётами
+  • UserInfoService.java - формирование информации о пользователях
+3) Пакет repository
+JPA-репозитории для всех сущностей:
+  • CollectionAccessRepository.java
+  • CollectionReportRepository.java
+  • CollectionRepository.java
+  • DatabaseConnectionRepository.java
+  • GroupRepository.java
+  • ReportQueueRepository.java
+  • ReportRepository.java
+  • UserGroupRepository.java
+  • UserInfoRepository.java
+4) Пакет model
+  • Entity:
+  Все сущности из БД + отдельно вынесенные в сущности компоненты в Java-классах:
+    collection:
+      - Collection.java
+      - CollectionAccess.java
+      - CollectionReport.java
+      - CollectionReportId.java
+    dbconnection:
+      - DatabaseConnection.java
+    group:
+      - Group.java
+    report:
+      - Report.java
+      - ReportQueue.java
+      - TaskStatus.java
+    user:
+      - Role.java
+      - UserInfo.java
+    usergroup:
+      - UserGroup.java
+      - UserGroupId.java
+  • DTO:
+    collection:
+      - CollectionDto.java
+      - CreateCollectionDto.java
+      - UpdateCollectionDto.java
+    connection:
+      - CreateDatabaseConnectionDto.java
+      - DatabaseConnectionDto.java
+      - FullDatabaseConnectionDto.java
+    exception:
+      - ExceptionDto.java
+    group
+      - CreateGroupDto.java
+      - GroupDto.java
+      - UpdateGroupDto.java
+    report:
+      - AvailableReportsDto.java
+      - CreateReportDto.java
+      - ReportMetadataDto.java
+      - ReportQueueResultDto.java
+      - UpdateReportDto.java
+    user:
+      - CreateUserInfoDto.java
+5) Пакет config
+  • SecurityConfig.java - настройка Spring Security + JWT
+  • JdbcConfig.java - конфигурация источников данных
+  • SwaggerConfig.java - документация API
+  • JwtFilter.java - фильтр аутентификации
+  • JwtService.java - настройка JWT
+6) Пакет exception
+  • Специализированные исключения:
+    - GlobalExceptionHandler.java - централизованный класс-обработчик
+    - CollectionAccessDeniedException.java
+    - CollectionNotFoundException.java
+    - ConnectionNotFoundException.java
+    - DatabaseConnectionNotFoundException.java
+    - GroupNotFoundException.java
+    - InvalidReportQueryException.java
+    - ReportNotFoundException.java
+    - UnsupportedDatabaseException.java
+    - UserNotFoundException.java
+7) Пакет component
+  • Специальные компоненты:
+    - ReportQueueWorker.java - фоновый обработчик очереди
+    - ResultStorage.java - временное хранение результатов
+8) Пакет mapper
+  Классы для преобразований типов Entity ↔ DTO:
+  • CollectionMapper.java
+  • DatabaseConnectionMapper.java
+  • GroupMapper.java
+  • ReportMapper.java
 
 ## Варианты использования системы отчетов
 
@@ -367,3 +514,474 @@
 **Альтернативный поток**
 1. Если подключение не удалось, система выводит ошибку (например, "Неверные учетные данные")
 **Постусловие:** Новое подключение добавлено в систему и доступно для использования в отчётах
+
+## Диаграммы последовательностей системы отчётов
+
+### 1. Вход в систему
+
+@startuml
+
+actor "Пользователь (USER, ANALYST,ADMIN)" as user
+box  "Сайт" #AliceBlue
+  participant "UI" as UI
+end box
+
+box "Сервис авторизации" #LightGreen
+  participant "AuthService" as Auth
+end box
+
+box "БД" #00856f
+  database "Таблица users" as DB
+end box
+
+group <b>1.</b> Вход через email и пароль
+  user -> UI : Вводит email и пароль
+  activate user
+  activate UI
+  
+    UI -> Auth : POST /auth/login {email, password}
+  activate Auth
+  Auth -> Auth : Валидность email ('@company.com')
+  alt Некорпоративный email
+    Auth --> UI : 403 Forbidden\n«Доступ разрешён только с корпоративного email»
+    UI --> user : Показать ошибку
+    deactivate Auth
+    deactivate UI
+    deactivate user
+  else Корпоративный email
+    Auth -> DB : Поиск пользователя по email
+    activate DB
+
+    alt Пользователь не найден
+      DB --> Auth : null
+      deactivate DB
+      Auth --> UI : 401 Unauthorized\n«Пользователь не найден»
+      UI --> user : Показать ошибку
+      deactivate Auth
+      deactivate UI
+      deactivate user
+    else Пользователь найден
+      DB --> Auth : user
+      Auth -> Auth : Проверка хэша пароля
+
+      alt Неверный пароль
+        Auth --> UI : 401 Unauthorized\n«Неверный пароль»
+        UI --> user : Показать ошибку
+        deactivate Auth
+        deactivate UI
+        deactivate user
+      else Пароль верный
+        Auth -> DB : Обновление is_active = true
+        Auth -> Auth : Генерация JWT (user_id, role)
+        Auth --> UI : JWT токен
+        deactivate Auth
+
+        UI -> UI : Сохранение токена
+        UI --> user : Перенаправление на главную страницу
+        deactivate UI
+        deactivate user
+      end
+    end
+  end
+
+end group
+
+
+group <b>2.</b> Вход через OAuth (например, Яндекс)
+
+  user -> UI : Нажимает "Войти через Яндекс"
+  activate user
+  UI -> UI : Инициировать OAuth
+
+  note over UI : OAuth-провайдер возвращает email и access_token
+
+  UI -> Auth : POST /auth/login {email, access_token}
+  activate Auth
+
+  Auth -> Auth : Валидность email ('@company.com')
+  alt Некорпоративный email
+    Auth --> UI : 403 Forbidden\n«Доступ разрешён только с корпоративного email»
+    UI --> user : Показать ошибку
+    deactivate Auth
+    deactivate UI
+    deactivate user
+  else Корпоративный email
+    Auth -> DB : Поиск пользователя по email
+    activate DB
+
+    alt Пользователь не найден
+      DB --> Auth : null
+      deactivate DB
+      Auth --> UI : 401 Unauthorized\n«Пользователь не найден»
+      UI --> user : Показать ошибку
+      deactivate Auth
+      deactivate UI
+      deactivate user
+    else Пользователь найден
+      DB --> Auth : user
+      Auth -> DB : Обновление is_active = true
+      Auth -> Auth : Генерация JWT (user_id, role)
+      Auth --> UI : JWT токен
+      deactivate Auth
+
+      UI -> UI : Сохранение токена
+      UI --> user : Перенаправление на главную страницу
+      deactivate UI
+      deactivate user
+    end
+  end
+
+end group
+
+@enduml
+
+### 2. Регистрация
+
+@startuml
+
+title Регистрация
+actor "Администратор" as admin
+
+box  "Сайт" #AliceBlue   
+   participant "UI" as UI 
+end box  
+
+box "Сервис авторизации" #LightGreen   
+   participant "AuthService" as Auth 
+end box  
+
+box "БД" #00856f
+   database "Таблица users" as DB 
+end box 
+
+group <b>1.</b> Регистрация нового пользователя
+
+  admin -> UI : Переходит на страницу регистрации
+  activate admin
+  activate UI
+
+  UI --> admin : Отображает форму регистрации (email, имя пользователя, пароль, подтверждение пароля, роль)
+
+  admin -> UI : Вводит данные пользователя
+  UI -> Auth : POST /auth/register {email, name, password, confirmPassword, role}
+  activate Auth
+
+  Auth -> Auth : Валидность email ('@company.com') 
+
+  alt Некорпоративный email
+    Auth --> UI : 403 Forbidden\n«Доступ разрешён только с корпоративного email»
+    UI --> admin : Показать ошибку, предложить изменить email
+    deactivate Auth
+    deactivate UI
+    deactivate admin
+  else Корпоративный email
+    Auth -> DB : Поиск пользователя по email 
+    activate DB
+
+    alt Email уже используется
+      DB --> Auth : найден пользователь
+      Auth --> UI : 409 Conflict\n«Email уже зарегистрирован»
+      UI --> admin : Показать ошибку, предложить изменить email
+      deactivate DB
+      deactivate Auth
+      deactivate UI
+      deactivate admin
+    else Email уникален
+      DB --> Auth : null
+      deactivate DB
+
+      Auth -> Auth : Проверка сложности пароля и совпадения confirmPassword
+
+      alt Пароль не соответствует требованиям
+        Auth --> UI : 400 Bad Request\n«Слабый пароль или не совпадает подтверждение»
+        UI --> admin : Показать ошибку, предложить изменить пароль
+        deactivate Auth
+        deactivate UI
+        deactivate admin
+      else Все проверки пройдены
+        Auth -> DB : Добавление учетной записи пользователя
+        Auth --> UI : 201 Created\n«Пользователь успешно зарегистрирован»
+        deactivate Auth
+
+        UI --> admin : Подтверждение успешной регистрации
+        deactivate UI
+        deactivate admin
+      end
+    end
+  end
+
+end group
+
+@enduml
+
+### 3. Выход из системы
+
+@startuml
+
+title Выход из системы
+
+actor "Пользователь (USER, ANALYST, ADMIN)" as user
+box  "Сайт" #AliceBlue
+   participant "UI" as UI 
+end box  
+box "Сервис авторизации" #LightGreen   
+   participant "AuthService" as Auth 
+end box  
+box "БД" #00856f   
+   database "Таблица users" as DB 
+end box 
+
+group <b>1.</b> Выход из системы
+
+  user -> UI : Нажимает "Выход"
+  activate user
+  activate UI
+
+  UI -> Auth : POST /auth/logout\nAuthorization: Bearer <JWT>
+  activate Auth
+
+  Auth -> Auth : Извлечь user_id из JWT
+  Auth -> DB : SELECT * FROM users WHERE id = user_id
+  activate DB
+  DB --> Auth : Пользователь найден
+  deactivate DB
+
+  Auth -> DB : UPDATE users SET is_active = false WHERE id = user_id
+  Auth --> UI : 200 OK
+  deactivate Auth
+
+  UI -> UI : Удаляет токен из хранилища
+  UI --> user : Перенаправление на страницу входа
+  deactivate UI
+  deactivate user
+
+end group
+
+
+@enduml
+
+### 4. Назначение ролей
+
+@startuml
+
+title Назначение ролей
+
+actor "Администратор" as admin
+
+box "Сайт" #AliceBlue
+  participant "UI" as UI
+end box
+
+box "Backend" #LightGreen 
+  participant "Backend" as BE
+  database "БД пользователей" as DB
+end box
+
+box "БД" #00856f  
+   database "Таблица users" as DB 
+end box 
+
+group <b>1.</b> Загрузка списка пользователей
+  admin -> UI : Открывает страницу управления пользователями
+  activate admin
+  activate UI
+
+  UI -> BE : GET /users
+  activate BE
+  BE -> DB : SELECT * FROM users
+  activate DB
+  DB --> BE : Список пользователей
+  deactivate DB
+
+  BE --> UI : JSON со списком пользователей
+  deactivate BE
+
+  UI -> admin : Отображает список пользователей
+  deactivate UI
+  deactivate admin
+end group
+
+group <b>2.</b> Назначение роли
+  admin -> UI : Выбирает пользователя из списка и роль(из списка), нажимает «Сохранить изменения»
+  activate admin
+  activate UI
+
+  UI -> BE : PATCH /users/{id}/role\n{ "role": "ANALYST" }
+  activate BE
+
+  BE -> DB : SELECT * FROM users WHERE id = {id}
+  activate DB
+  DB --> BE : Пользователь найден
+
+  BE -> DB : UPDATE users SET role = 'ANALYST' WHERE id = {id}
+  deactivate DB
+
+  BE --> UI : 200 OK, "Роль успешно обновлена"
+  deactivate BE
+
+  UI -> admin : Показывает сообщение об успехе, обновляет UI
+  deactivate UI
+  deactivate admin
+end group
+
+
+@enduml
+
+### 5. Просмотр пользователей
+
+@startuml
+
+title Просмотр списка пользователей с фильтрацией
+actor "Администратор" as admin
+
+box "Сайт" #AliceBlue
+  participant "UI" as UI
+end box
+
+box "Backend" #LightGreen 
+  participant "Backend" as BE
+  database "БД пользователей" as DB
+end box
+
+box "БД" #00856f  
+   database "Таблица users" as DB 
+end box 
+
+group <b>1.</b> Загрузка списка пользователей
+  admin -> UI : Открывает страницу управления пользователями
+  activate admin
+  activate UI
+
+  UI -> BE : GET /users
+  activate BE
+  BE -> DB : SELECT * FROM users
+  activate DB
+  DB --> BE : Список пользователей
+  deactivate DB
+
+  BE --> UI : JSON со списком пользователей
+  deactivate BE
+
+  UI -> admin : Отображает список пользователей
+  deactivate UI
+  deactivate admin
+end group
+
+group <b>2.</b> Фильтрация по ролям
+  admin -> UI : Выбирает роль в фильтре (USER, ANALYST, ADMIN)
+  activate admin
+  activate UI
+
+  UI -> BE : GET /users?role= роль
+  activate BE
+  BE -> DB : SELECT * FROM users WHERE role = 'роль'
+  activate DB
+  DB --> BE : Список пользователей с выбранной ролью
+  deactivate DB
+
+  BE --> UI : JSON с отфильтрованным списком
+  deactivate BE
+
+  UI -> admin : Отображает отфильтрованных пользователей
+  deactivate UI
+  deactivate admin
+end group
+
+
+@enduml
+
+### 6. Создание отчёта
+
+@startuml
+
+title Создание отчётов
+
+actor "Аналитик/Администратор" as user
+
+box "Сайт" #AliceBlue
+  participant "UI" as UI
+end box
+
+box "Backend" #LightSteelBlue
+  participant "Backend" as BE
+end box
+
+box "БД" #LightGreen
+  database "Таблица database_connection" as DBC
+  database "Таблица reports" as ReportsDB
+  database "Таблица report_parameters" as ParamsDB
+end box
+== 1. Получение списка подключенных БД ==
+user -> UI: Открывает страницу создания отчета
+activate user
+activate UI
+
+UI -> BE: GET /db-connections
+activate BE
+
+BE -> DBC: SELECT * FROM database_connections
+activate DBC
+DBC --> BE: Список подключений
+deactivate DBC
+
+BE --> UI: JSON со списком подключений
+deactivate BE
+
+UI -> user: Отображает форму и список БД
+deactivate UI
+deactivate user
+
+== 2. Заполнение и отправка формы отчета ==
+user -> UI: Вводит название, SQL, параметры, выбирает БД
+activate user
+activate UI
+
+UI -> BE: POST /reports {name, sql, db_id, params}
+activate BE
+
+BE -> BE: Валидация SQL (только SELECT)
+alt Недопустимый SQL
+  BE --> UI: 400 Bad Request \n"Недопустимый SQL-запрос"
+  deactivate BE
+  UI -> user: Показывает ошибку в SQL
+  deactivate UI
+  deactivate user
+else SQL допустим
+  BE -> BE: Валидация параметров
+  alt Ошибка в параметрах
+    BE --> UI: 400 Bad Request \n"Ошибка в параметрах запроса"
+    deactivate BE
+    UI -> user: Показывает ошибку параметров
+    deactivate UI
+    deactivate user
+  else Параметры валидны
+    BE -> ReportsDB: Проверка уникальности названия
+    activate ReportsDB
+    alt Название уже существует
+      ReportsDB --> BE: Дубликат найден
+      deactivate ReportsDB
+      BE --> UI: 409 Conflict \n"Отчет с таким названием уже существует"
+      deactivate BE
+      UI -> user: Предложение изменить имя
+      deactivate UI
+      deactivate user
+    else Название уникально
+      ReportsDB --> BE: Нет дубликата
+      BE -> BE: Генерация UUID
+      BE -> ReportsDB: INSERT INTO reports
+      ReportsDB --> BE: OK
+      deactivate ReportsDB
+
+      BE -> ParamsDB: INSERT INTO report_parameters (по report_id)
+      ParamsDB --> BE: OK
+
+      BE --> UI: 201 Created \n{report_uuid}
+      deactivate BE
+      UI -> user: Отображает сообщение об успехе
+      deactivate UI
+      deactivate user
+    end
+  end
+end
+
+@enduml
