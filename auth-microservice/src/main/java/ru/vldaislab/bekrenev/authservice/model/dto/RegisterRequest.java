@@ -13,6 +13,7 @@ import ru.vldaislab.bekrenev.authservice.annotations.email.EmailPostfix;
 @AllArgsConstructor
 @Builder
 public class RegisterRequest {
+    
     @NotBlank(message = "Имя пользователя обязательно")
     @Size(min = 4, max = 20, message = "Имя пользователя должно быть от 4 до 20 символов")
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Имя пользователя может содержать только буквы, цифры и подчеркивание")

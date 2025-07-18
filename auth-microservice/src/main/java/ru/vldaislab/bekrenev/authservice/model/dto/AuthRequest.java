@@ -9,6 +9,7 @@ import ru.vldaislab.bekrenev.authservice.annotations.email.EmailPostfix;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthRequest {
+
     @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Некорректный формат email")
     @EmailPostfix(postfix = "@tbank.ru", message = "Разрешены только корпоративные email")
