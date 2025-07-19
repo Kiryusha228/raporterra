@@ -27,7 +27,6 @@ public class AuthService {
 
     private final UserInfoClient userInfoClient;
 
-    @Transactional
     public AuthResponse register(RegisterRequest request) {
         User user = User.builder()
                 .email(request.getEmail())

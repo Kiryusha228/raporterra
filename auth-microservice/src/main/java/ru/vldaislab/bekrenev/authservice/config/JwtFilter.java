@@ -30,6 +30,11 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        if (request.getServletPath().startsWith("/api/auth/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -38,6 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
 
         jwt = authHeader.substring(7);
         username = jwtService.extractUsername(jwt);
