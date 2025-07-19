@@ -9,6 +9,7 @@ import ru.vldaislab.bekrenev.authservice.model.dto.CreateUserInfoDto;
 @Component
 @RequiredArgsConstructor
 public class UserInfoClient {
+
     private final WebClientConfig webClient;
 
     public void addUserInfo(CreateUserInfoDto createUserInfoDto) {

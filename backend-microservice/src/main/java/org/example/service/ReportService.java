@@ -15,8 +15,10 @@ import org.example.model.entity.user.Role;
 import org.example.repository.DatabaseConnectionRepository;
 import org.example.repository.ReportRepository;
 import org.example.repository.UserInfoRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -33,6 +35,8 @@ public class ReportService {
     private final JdbcConfig jdbcConfig;
 
     private final ResultStorage resultStorage;
+
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public UUID createReport(CreateReportDto createReportDto, String userMail) {
         var connection = databaseConnectionRepository
@@ -101,13 +105,23 @@ public class ReportService {
                 () -> new ReportNotFoundException("Отчет с данным UUID не найден!")
         );
 
-        var jdbcTemplate = jdbcConfig.createJdbcTemplate(report.getConnection());
+        String redisKey = "report_result:" + reportId;
+
+        var cached = redisTemplate.opsForValue().get(redisKey);
+        if (cached != null) {
+            return (List<Map<String, Object>>) cached;
+        }
 
         if (!isSelectQuery(report.getSqlQuery())) {
             throw new InvalidReportQueryException("Разрешены только SELECT-запросы");
         }
 
-        return jdbcTemplate.queryForList(report.getSqlQuery());
+        var jdbcTemplate = jdbcConfig.createJdbcTemplate(report.getConnection());
+        var result = jdbcTemplate.queryForList(report.getSqlQuery());
+
+        redisTemplate.opsForValue().set(redisKey, result, Duration.ofMinutes(30));
+
+        return result;
     }
 
     private boolean isSelectQuery(String sql) { // todo мб можно сделать более правильно
