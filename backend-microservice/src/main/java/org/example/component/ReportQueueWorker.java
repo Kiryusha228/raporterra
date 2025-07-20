@@ -14,7 +14,7 @@ public class ReportQueueWorker {
     private final ReportService reportService;
     private final ResultStorage resultStorage;
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 2000)
     public void execute() {
         reportQueueService.getNextPending().ifPresent(task -> {
             try {

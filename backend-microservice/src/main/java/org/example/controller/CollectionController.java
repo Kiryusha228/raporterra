@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.example.model.dto.collection.CollectionDto;
 import org.example.model.dto.collection.CreateCollectionDto;
 import org.example.model.dto.collection.UpdateCollectionDto;
+import org.example.model.dto.group.GroupDto;
 import org.example.model.dto.report.AvailableReportsDto;
+import org.example.model.dto.user.UserInfoResponseDto;
 import org.example.service.CollectionService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -20,13 +23,28 @@ public class CollectionController {
     private final CollectionService collectionService;
 
     @GetMapping("/get")
-    public Set<CollectionDto> getCollections(Principal principal){
-        return collectionService.getCollections(principal.getName());
+    public Set<CollectionDto> getCollections(Authentication authentication){
+        var role = authentication.getAuthorities().stream().toList().get(0).toString();
+        var mail = authentication.getName();
+        return collectionService.getCollections(mail, role);
     }
 
     @GetMapping("/get/reports/{collectionId}")
-    public List<AvailableReportsDto> getReportsInCollection(Principal principal, @PathVariable Long collectionId){
-        return collectionService.getReportsInCollection(collectionId, principal.getName());
+    public List<AvailableReportsDto> getReportsInCollection(Authentication authentication, @PathVariable Long collectionId){
+        var role = authentication.getAuthorities().stream().toList().get(0).toString();
+        var mail = authentication.getName();
+
+        return collectionService.getReportsInCollection(collectionId, mail, role);
+    }
+
+    @GetMapping("/get/users/{collectionId}")
+    public List<UserInfoResponseDto> getUsersInCollection(@PathVariable Long collectionId){
+        return collectionService.getUsersInCollection(collectionId);
+    }
+
+    @GetMapping("/get/groups/{collectionId}")
+    public List<GroupDto> getGroupsInCollection(@PathVariable Long collectionId){
+        return collectionService.getGroupsInCollection(collectionId);
     }
 
     @PostMapping("")
@@ -37,6 +55,11 @@ public class CollectionController {
     @PutMapping("/{collectionId}")
     public void updateCollection(@RequestBody UpdateCollectionDto updateCollectionDto, @PathVariable Long collectionId){
         collectionService.updateCollection(updateCollectionDto, collectionId);
+    }
+
+    @DeleteMapping("/{collectionId}")
+    public void deleteCollection(@PathVariable Long collectionId){
+        collectionService.deleteCollection(collectionId);
     }
 
     @PostMapping("/{collectionId}/reports/{reportId}")

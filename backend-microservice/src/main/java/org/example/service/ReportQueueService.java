@@ -10,6 +10,7 @@ import org.example.repository.ReportQueueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.spi.LocaleNameProvider;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,11 @@ public class ReportQueueService {
     @Transactional
     public Optional<ReportQueue> getNextPending() {
         return reportQueueRepository.findNextPending();
+    }
+
+    public TaskStatus getStatus(Long taskId) {
+        var task = reportQueueRepository.findById(taskId).orElseThrow(() ->new RuntimeException("Задача не найдена"));
+        return task.getStatus();
     }
 
     @Transactional

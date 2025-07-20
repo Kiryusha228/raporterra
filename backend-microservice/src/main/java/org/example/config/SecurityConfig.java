@@ -38,7 +38,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/connections/all",
                                 "/api/reports/get",
                                 "/api/reports/execute",
-                                "/api/collections/get/**"
+                                "/api/reports/execute/**",
+                                "/api/collections/get",
+                                "/api/collections/get/**",
+                                "/api/groups/user"
                         ).hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/connections",
                                 "/api/connections/**",

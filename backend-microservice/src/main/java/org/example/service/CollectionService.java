@@ -2,24 +2,33 @@ package org.example.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.client.UserClient;
 import org.example.exception.CollectionAccessDeniedException;
 import org.example.exception.CollectionNotFoundException;
 import org.example.exception.GroupNotFoundException;
 import org.example.exception.ReportNotFoundException;
 import org.example.mapper.CollectionMapper;
+import org.example.mapper.GroupMapper;
 import org.example.mapper.ReportMapper;
+import org.example.mapper.UserMapper;
 import org.example.model.dto.collection.CollectionDto;
 import org.example.model.dto.collection.CreateCollectionDto;
 import org.example.model.dto.collection.UpdateCollectionDto;
+import org.example.model.dto.group.GroupDto;
 import org.example.model.dto.report.AvailableReportsDto;
+import org.example.model.dto.user.UserInfoResponseDto;
+import org.example.model.dto.user.UserResponseDto;
 import org.example.model.entity.collection.Collection;
+import org.example.model.entity.collection.CollectionAccess;
 import org.example.model.entity.collection.CollectionReport;
 import org.example.model.entity.collection.CollectionReportId;
 import org.example.model.entity.group.Group;
+import org.example.model.entity.user.Role;
 import org.example.model.entity.usergroup.UserGroup;
 import org.example.repository.*;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,28 +43,35 @@ public class CollectionService {
 
     private final CollectionMapper collectionMapper;
     private final ReportMapper reportMapper;
+    private final UserMapper userMapper;
+    private final GroupMapper groupMapper;
 
 
-    public Set<CollectionDto> getCollections(String userMail) {
+    public Set<CollectionDto> getCollections(String userMail, String role) {
         var user = userInfoRepository.findByEmail(userMail).orElseThrow(
                 () -> new NullPointerException("Пользователя не существует")
         );
 
-        List<UserGroup> userGroups = userGroupRepository.findByUser(user);
-        List<Group> groups = userGroups.stream().map(UserGroup::getGroup).toList();
-
-        var collectionAccess = collectionAccessRepository.findByUser(user);
-        for (var group : groups) {
-            collectionAccess.addAll(collectionAccessRepository.findByGroup(group));
+        if (role.equals("ROLE_ADMIN")){
+            return collectionMapper.toCollectionDtoSet(new HashSet<>(collectionRepository.findAll()));
         }
+        else {
+            List<UserGroup> userGroups = userGroupRepository.findByUser(user);
+            List<Group> groups = userGroups.stream().map(UserGroup::getGroup).toList();
 
-        var collections = new HashSet<Collection>();
+            var collectionAccess = collectionAccessRepository.findByUser(user);
+            for (var group : groups) {
+                collectionAccess.addAll(collectionAccessRepository.findByGroup(group));
+            }
 
-        for (var access : collectionAccess) {
-            collections.add(access.getCollection());
+            var collections = new HashSet<Collection>();
+
+            for (var access : collectionAccess) {
+                collections.add(access.getCollection());
+            }
+
+            return collectionMapper.toCollectionDtoSet(collections);
         }
-
-        return collectionMapper.toCollectionDtoSet(collections);
     }
 
     @Transactional
@@ -211,7 +227,7 @@ public class CollectionService {
         collectionRepository.save(collection);
     }
 
-    public List<AvailableReportsDto> getReportsInCollection(Long collectionId, String userMail) {
+    public List<AvailableReportsDto> getReportsInCollection(Long collectionId, String userMail, String role) {
         var collection = collectionRepository.findById(collectionId).orElseThrow(
                 () -> new CollectionNotFoundException("Соединение не найдено!")
         );
@@ -225,7 +241,7 @@ public class CollectionService {
                 .map(UserGroup::getGroup)
                 .anyMatch(group -> collectionAccessRepository.existsByCollectionAndGroup(collection, group));
 
-        if (!hasDirectAccess && !hasGroupAccess) {
+        if (!hasDirectAccess && !hasGroupAccess && !role.equals("ROLE_ADMIN")) {
             throw new CollectionAccessDeniedException("Пользователь не имеет доступа!");
         }
 
@@ -238,4 +254,47 @@ public class CollectionService {
 
         return reports;
     }
+
+    public List<UserInfoResponseDto> getUsersInCollection(Long collectionId) {
+        var collection = collectionRepository.findById(collectionId).orElseThrow(
+                () -> new CollectionNotFoundException("Соединение не найдено!")
+        );
+
+
+        var users = collection.getCollectionAccesses()
+                .stream()
+                .map(CollectionAccess::getUser)
+                .filter(Objects::nonNull)
+                .toList();
+
+        var usersInfoResponse = new ArrayList<UserInfoResponseDto>();
+        for (var user : users) {
+            usersInfoResponse.add(userMapper.toUserInfoResponseDto(new UserResponseDto(user.getId(), Role.USER), user));
+        }
+
+        return usersInfoResponse;
+    }
+
+    public List<GroupDto> getGroupsInCollection(Long collectionId) {
+        var collection = collectionRepository.findById(collectionId).orElseThrow(
+                () -> new CollectionNotFoundException("Соединение не найдено!")
+        );
+
+
+        var groups = collection.getCollectionAccesses()
+                .stream()
+                .map(CollectionAccess::getGroup)
+                .filter(Objects::nonNull)
+                .toList();
+
+        return groupMapper.toGroupDtoList(groups);
+    }
+
+    public void deleteCollection(Long collectionId){
+        var collection = collectionRepository.findById(collectionId).orElseThrow(
+                () -> new CollectionNotFoundException("Соединение не найдено!")
+        );
+        collectionRepository.delete(collection);
+    }
+
 }

@@ -10,17 +10,19 @@ import org.example.exception.ReportNotFoundException;
 import org.example.exception.UserNotFoundException;
 import org.example.mapper.ReportMapper;
 import org.example.model.dto.report.*;
+import org.example.model.entity.collection.CollectionAccess;
+import org.example.model.entity.collection.CollectionReport;
 import org.example.model.entity.report.Report;
 import org.example.model.entity.user.Role;
-import org.example.repository.DatabaseConnectionRepository;
-import org.example.repository.ReportRepository;
-import org.example.repository.UserInfoRepository;
+import org.example.model.entity.usergroup.UserGroup;
+import org.example.repository.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,11 @@ public class ReportService {
 
     private final ResultStorage resultStorage;
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    //private final RedisTemplate<String, Object> redisTemplate;
+
+    private final UserGroupRepository userGroupRepository;
+    private final CollectionAccessRepository collectionAccessRepository;
+    private final CollectionReportRepository collectionReportRepository;
 
     public UUID createReport(CreateReportDto createReportDto, String userMail) {
         var connection = databaseConnectionRepository
@@ -59,13 +65,36 @@ public class ReportService {
         return report.getId();
     }
 
-    public List<AvailableReportsDto> getAvailableReports(String role) {
+    public List<AvailableReportsDto> getAvailableReports(String role, String mail) {
         List<Report> reports;
         if (role.equals("ROLE_ADMIN")) {
             reports = reportRepository.findAll();
-        }
-        else {
-            reports = reportRepository.findByIsPublicTrue();
+        } else {
+            var user = userRepository.findByEmail(mail)
+                    .orElseThrow(() -> new UserNotFoundException("Пользователь не найден!"));
+
+            var userGroups = userGroupRepository.findByUser(user);
+            var groups = userGroups.stream()
+                    .map(UserGroup::getGroup)
+                    .toList();
+
+            var collectionAccess = new HashSet<>(collectionAccessRepository.findByUser(user));
+
+            for (var group : groups) {
+                collectionAccess.addAll(collectionAccessRepository.findByGroup(group));
+            }
+
+            var collections = collectionAccess.stream()
+                    .map(CollectionAccess::getCollection)
+                    .collect(Collectors.toSet());
+
+            reports = collections.stream()
+                    .flatMap(collection ->
+                            collectionReportRepository.findByCollectionId(collection.getId()).stream()
+                    )
+                    .map(CollectionReport::getReport) // вытаскиваем Report из CollectionReport
+                    .distinct()
+                    .toList();
         }
         return reportMapper.toAvailableReportsDtoList(reports);
     }
@@ -107,10 +136,10 @@ public class ReportService {
 
         String redisKey = "report_result:" + reportId;
 
-        var cached = redisTemplate.opsForValue().get(redisKey);
-        if (cached != null) {
-            return (List<Map<String, Object>>) cached;
-        }
+//        var cached = redisTemplate.opsForValue().get(redisKey);
+//        if (cached != null) {
+//            return (List<Map<String, Object>>) cached;
+//        }
 
         if (!isSelectQuery(report.getSqlQuery())) {
             throw new InvalidReportQueryException("Разрешены только SELECT-запросы");
@@ -119,7 +148,7 @@ public class ReportService {
         var jdbcTemplate = jdbcConfig.createJdbcTemplate(report.getConnection());
         var result = jdbcTemplate.queryForList(report.getSqlQuery());
 
-        redisTemplate.opsForValue().set(redisKey, result, Duration.ofMinutes(30));
+        //redisTemplate.opsForValue().set(redisKey, result, Duration.ofMinutes(30));
 
         return result;
     }

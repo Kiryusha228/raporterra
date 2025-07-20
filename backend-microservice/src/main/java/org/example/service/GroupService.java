@@ -5,9 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.example.exception.GroupNotFoundException;
 import org.example.exception.UserNotFoundException;
 import org.example.mapper.GroupMapper;
+import org.example.mapper.UserMapper;
 import org.example.model.dto.group.CreateGroupDto;
 import org.example.model.dto.group.GroupDto;
+import org.example.model.dto.group.GroupForUserDto;
 import org.example.model.dto.group.UpdateGroupDto;
+import org.example.model.dto.user.UserInfoResponseDto;
+import org.example.model.dto.user.UserResponseDto;
+import org.example.model.entity.user.Role;
 import org.example.model.entity.user.UserInfo;
 import org.example.model.entity.usergroup.UserGroup;
 import org.example.model.entity.usergroup.UserGroupId;
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +34,7 @@ public class GroupService {
     private final UserInfoRepository userRepository;
 
     private final GroupMapper groupMapper;
+    private final UserMapper userMapper;
 
     public List<GroupDto> getAllGroups() {
         return groupMapper.toGroupDtoList(groupRepository.findAll());
@@ -93,7 +100,10 @@ public class GroupService {
 
         userGroupRepository.save(userGroup);
 
-        group.getUserGroups().add(userGroup);
+        var userGroups = group.getUserGroups();
+        userGroups.add(userGroup);
+        group.setUserGroups(userGroups);
+        groupRepository.save(group);
     }
 
     @Transactional
@@ -122,6 +132,25 @@ public class GroupService {
         group.getUserGroups().remove(userGroup);
 
         userGroupRepository.deleteById(userGroupId);
+    }
+
+    public List<GroupForUserDto> findInfo(String userMail){
+        var user = userRepository.findByEmail(userMail).orElseThrow(
+                ()->new UserNotFoundException("пользователь не найден!")
+        );
+        var groupForUserList = new ArrayList<GroupForUserDto>();
+        var groups = user.getUserGroups().stream().map(UserGroup::getGroup).toList();
+
+        for (var group : groups) {
+            var users = group.getUserGroups().stream().map(UserGroup::getUser).filter(Objects::nonNull).toList();
+            var usersInfoResponse = new ArrayList<UserInfoResponseDto>();
+            for (var u : users) {
+                usersInfoResponse.add(userMapper.toUserInfoResponseDto(new UserResponseDto(u.getId(), Role.USER), u));
+            }
+            var groupForUser = new GroupForUserDto(groupMapper.toGroupDto(group), usersInfoResponse);
+            groupForUserList.add(groupForUser);
+        }
+        return groupForUserList;
     }
 
 

@@ -3,6 +3,7 @@ package org.example.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.model.dto.group.CreateGroupDto;
 import org.example.model.dto.group.GroupDto;
+import org.example.model.dto.group.GroupForUserDto;
 import org.example.model.dto.group.UpdateGroupDto;
 import org.example.model.entity.usergroup.UserGroupId;
 import org.example.service.GroupService;
@@ -30,6 +31,11 @@ public class GroupController {
     @PostMapping("")
     public void createGroup(Principal principal, @RequestBody CreateGroupDto createGroupDto) {
         groupService.createGroup(createGroupDto, principal.getName());
+    }
+
+    @GetMapping("/user")
+    public List<GroupForUserDto> getGroupsForUser(Principal principal){
+        return groupService.findInfo(principal.getName());
     }
 
     @PutMapping("")

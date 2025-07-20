@@ -30,7 +30,9 @@ public class ReportController {
 
     @GetMapping("/get")
     public List<AvailableReportsDto> getAvailableReports(Authentication authentication) {
-        return reportService.getAvailableReports(authentication.getAuthorities().stream().toList().get(0).toString());
+        var role = authentication.getAuthorities().stream().toList().get(0).toString();
+        var mail = authentication.getName();
+        return reportService.getAvailableReports(role, mail);
     }
 
     @PutMapping("/{reportId}")
@@ -57,7 +59,13 @@ public class ReportController {
     public ResponseEntity<?> checkReport(@PathVariable Long taskId) {
         var result = reportService.getResult(taskId);
         if (result.isEmpty()){
-            return ResponseEntity.ok(reportQueueService.getQueueSize());
+            var status = reportQueueService.getStatus(taskId);
+            if (status == TaskStatus.FAILED) {
+                return ResponseEntity.ok(status);
+            }
+            else {
+                return ResponseEntity.ok(reportQueueService.getQueueSize());
+            }
         }
         return ResponseEntity.ok(result.get());
     }
