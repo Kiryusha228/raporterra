@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (request.getServletPath().startsWith("/api/auth/register")) {
+        if (request.getServletPath().startsWith("/api/**")) {
             filterChain.doFilter(request, response);
             return;
         }
