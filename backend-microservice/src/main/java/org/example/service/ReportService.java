@@ -30,6 +30,7 @@ public class ReportService {
     private final DatabaseConnectionRepository databaseConnectionRepository;
     private final UserInfoRepository userRepository;
     private final ReportRepository reportRepository;
+    private final ReportQueueRepository reportQueueRepository;
     private final ReportMapper reportMapper;
 
     private final ReportQueueService reportQueueService;
@@ -126,6 +127,8 @@ public class ReportService {
     }
 
     public void deleteReport(UUID reportId) {
+        reportQueueRepository.deleteAll(reportQueueRepository.findAllByReportId(reportId));
+
         reportRepository.deleteById(reportId);
     }
 

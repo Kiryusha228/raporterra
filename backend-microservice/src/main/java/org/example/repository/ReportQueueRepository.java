@@ -6,7 +6,9 @@ import org.example.model.entity.report.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ReportQueueRepository extends JpaRepository<ReportQueue, Long> {
 
@@ -21,5 +23,7 @@ public interface ReportQueueRepository extends JpaRepository<ReportQueue, Long> 
     Optional<ReportQueue> findNextPending();
 
     Long countByStatus(TaskStatus status);
+
+    List<ReportQueue> findAllByReportId(UUID reportId);
 }
 
